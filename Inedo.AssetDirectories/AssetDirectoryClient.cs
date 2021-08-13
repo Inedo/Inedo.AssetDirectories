@@ -16,17 +16,17 @@ namespace Inedo.AssetDirectories
     public sealed partial class AssetDirectoryClient
     {
         private readonly string? apiKey;
+        private readonly string? basicAuthToken;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AssetDirectoryClient"/> class.
         /// </summary>
         /// <param name="endpointUrl">API endpoint URL of the asset directory.</param>
         /// <param name="apiKey">ProGet API key used to authenticate requests.</param>
-        /// <remarks>
-        /// When <paramref name="apiKey"/> is not specified, requests will be made anonymously.
-        /// </remarks>
+        /// <param name="userName">The user name to supply when using basic authentication.</param>
+        /// <param name="password">The password to supply when using basic authentication.</param>
         /// <exception cref="ArgumentNullException"><paramref name="endpointUrl"/> is null or empty.</exception>
-        public AssetDirectoryClient(string endpointUrl, string? apiKey = null)
+        public AssetDirectoryClient(string endpointUrl, string? apiKey = null, string? userName = null, string? password = null)
         {
             if (string.IsNullOrWhiteSpace(endpointUrl))
                 throw new ArgumentNullException(nameof(endpointUrl));
@@ -35,6 +35,9 @@ namespace Inedo.AssetDirectories
             this.EndpointUrl = endpointUrl;
             if (!endpointUrl.EndsWith("/"))
                 this.EndpointUrl += "/";
+
+            if (!string.IsNullOrEmpty(userName))
+                this.basicAuthToken = "Basic " + Convert.ToBase64String(new UTF8Encoding(false).GetBytes(userName + ":" + password));
         }
 
         /// <summary>
@@ -208,6 +211,8 @@ namespace Inedo.AssetDirectories
         internal HttpWebRequest CreateRequest(string url, bool decompression = false)
         {
             var request = WebRequest.CreateHttp(this.EndpointUrl + url);
+            if (this.basicAuthToken != null)
+                request.Headers["Authorization"] = this.basicAuthToken;
             if (this.apiKey != null)
                 request.Headers["X-ProGet-ApiKey"] = this.apiKey;
 
