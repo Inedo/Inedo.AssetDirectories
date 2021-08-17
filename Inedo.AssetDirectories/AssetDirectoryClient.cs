@@ -80,7 +80,7 @@ namespace Inedo.AssetDirectories
             if (contentType == null && userMetadata == null)
                 return;
 
-            var request = this.CreateRequest("metadata/" + path);
+            var request = this.CreateRequest("metadata/" + Uri.EscapeUriString(path));
             request.Method = "POST";
             request.ContentType = "application/json";
 
@@ -103,7 +103,7 @@ namespace Inedo.AssetDirectories
         public async Task<IReadOnlyCollection<AssetDirectoryItem>> ListContentsAsync(string? path = null, bool recursive = false, CancellationToken cancellationToken = default)
         {
             CanonicalizeOptionalPath(ref path);
-            var request = this.CreateRequest($"dir/{path?.Trim('/')}?recursive={recursive.ToString().ToLowerInvariant()}", true);
+            var request = this.CreateRequest($"dir/{Uri.EscapeUriString(path?.Trim('/') ?? string.Empty)}?recursive={recursive.ToString().ToLowerInvariant()}", true);
             request.Accept = "application/json";
             using var response = await GetResponseAsync(request, cancellationToken).ConfigureAwait(false);
             if (response.ContentType?.StartsWith("application/json") != true)
@@ -127,7 +127,7 @@ namespace Inedo.AssetDirectories
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentNullException(nameof(path));
 
-            var request = this.CreateRequest("content/" + path);
+            var request = this.CreateRequest("content/" + Uri.EscapeUriString(path));
             request.Method = "POST";
             request.ContentType = contentType;
             request.AllowWriteStreamBuffering = false;
@@ -167,7 +167,7 @@ namespace Inedo.AssetDirectories
             if ((totalSize % partSize) != 0)
                 totalParts++;
 
-            var request = this.CreateRequest($"content/{path}?multipart=upload&id={id}&index=0&offset=0&totalSize={totalSize}&partSize={partSize}&totalParts={totalParts}");
+            var request = this.CreateRequest($"content/{Uri.EscapeUriString(path)}?multipart=upload&id={id}&index=0&offset=0&totalSize={totalSize}&partSize={partSize}&totalParts={totalParts}");
             request.Method = "POST";
             request.ContentType = contentType;
             request.AllowWriteStreamBuffering = false;
@@ -187,9 +187,29 @@ namespace Inedo.AssetDirectories
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentNullException(nameof(path));
 
-            var request = this.CreateRequest(path);
+            var request = this.CreateRequest("content/" + Uri.EscapeUriString(path));
             var response = await GetResponseAsync(request, cancellationToken).ConfigureAwait(false);
             return response.GetResponseStream();
+        }
+        /// <summary>
+        /// Opens the specified asset as a random access stream.
+        /// </summary>
+        /// <param name="path">Full path of the asset to download.</param>
+        /// <param name="bufferSize">Size in bytes of the local read buffer.</param>
+        /// <param name="cancellationToken">Token used to cancel asynchronous operation.</param>
+        /// <returns><see cref="Stream"/> of the downloaded asset.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="path"/> is null or empty.</exception>
+        public async Task<Stream> OpenRandomAccessFileAsync(string path, int bufferSize = 8192, CancellationToken cancellationToken = default)
+        {
+            CanonicalizePath(ref path);
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentNullException(nameof(path));
+
+            var metadata = await this.GetItemMetadataAsync(path, cancellationToken).ConfigureAwait(false);
+            if (metadata.Directory)
+                throw new InvalidOperationException("Cannot open remote directory as a file.");
+
+            return bufferSize > 0 ? new BufferedStream(new RandomAccessDownloadStream(metadata, this), bufferSize) : new RandomAccessDownloadStream(metadata, this);
         }
         /// <summary>
         /// Deletes an asset item or folder.
@@ -256,7 +276,7 @@ namespace Inedo.AssetDirectories
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentNullException(nameof(path));
 
-            var request = this.CreateRequest("metadata/" + path, true);
+            var request = this.CreateRequest("metadata/" + Uri.EscapeUriString(path), true);
             using var response = await GetResponseAsync(request, cancellationToken).ConfigureAwait(false);
             using var stream = response.GetResponseStream();
 
