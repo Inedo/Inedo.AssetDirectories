@@ -195,11 +195,14 @@ namespace Inedo.AssetDirectories
         /// Opens the specified asset as a random access stream.
         /// </summary>
         /// <param name="path">Full path of the asset to download.</param>
-        /// <param name="bufferSize">Size in bytes of the local read buffer.</param>
         /// <param name="cancellationToken">Token used to cancel asynchronous operation.</param>
         /// <returns><see cref="Stream"/> of the downloaded asset.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="path"/> is null or empty.</exception>
-        public async Task<Stream> OpenRandomAccessFileAsync(string path, int bufferSize = 8192, CancellationToken cancellationToken = default)
+        /// <remarks>
+        /// The returned stream is not buffered in any way. It is recommended to either read in large blocks
+        /// or to add a buffering layer on top. To read a file sequentially, use <see cref="DownloadFileAsync(string, CancellationToken)"/> instead.
+        /// </remarks>
+        public async Task<Stream> OpenRandomAccessFileAsync(string path, CancellationToken cancellationToken = default)
         {
             CanonicalizePath(ref path);
             if (string.IsNullOrEmpty(path))
@@ -209,7 +212,7 @@ namespace Inedo.AssetDirectories
             if (metadata.Directory)
                 throw new InvalidOperationException("Cannot open remote directory as a file.");
 
-            return bufferSize > 0 ? new BufferedStream(new RandomAccessDownloadStream(metadata, this), bufferSize) : new RandomAccessDownloadStream(metadata, this);
+            return new RandomAccessDownloadStream(metadata, this);
         }
         /// <summary>
         /// Deletes an asset item or folder.
