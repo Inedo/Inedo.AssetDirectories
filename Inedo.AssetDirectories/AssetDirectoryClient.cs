@@ -171,6 +171,7 @@ namespace Inedo.AssetDirectories
             request.Method = "POST";
             request.ContentType = contentType;
             request.AllowWriteStreamBuffering = false;
+            request.ContentLength = partSize;
 
             return new MultipartUploadStream(this, path, totalSize, partSize, id, request, await request.GetRequestStreamAsync().ConfigureAwait(false));
         }
