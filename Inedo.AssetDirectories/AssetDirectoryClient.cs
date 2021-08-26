@@ -219,16 +219,36 @@ namespace Inedo.AssetDirectories
         /// Deletes an asset item or folder.
         /// </summary>
         /// <param name="path">Full path of the asset to delete.</param>
+        /// <param name="recursive">When the path refers to a directory, recursively delete contents if <c>true</c>.</param>
         /// <param name="cancellationToken">Token used to cancel asynchronous operation.</param>
         /// <exception cref="ArgumentNullException"><paramref name="path"/> is null or empty.</exception>
-        public async Task DeleteItemAsync(string path, CancellationToken cancellationToken = default)
+        public async Task DeleteItemAsync(string path, bool recursive = false, CancellationToken cancellationToken = default)
         {
             CanonicalizePath(ref path);
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentNullException(nameof(path));
 
-            var request = this.CreateRequest("content/" + Uri.EscapeUriString(path));
-            request.Method = "DELETE";
+            var request = this.CreateRequest($"delete/{Uri.EscapeUriString(path)}?recursive={recursive}");
+            request.Method = "POST";
+            using var response = await GetResponseAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+        /// <summary>
+        /// Creates the specified subdirectory if it does not already exist.
+        /// </summary>
+        /// <param name="path">Full path of the directory to create.</param>
+        /// <param name="cancellationToken">Token used to cancel asynchronous operation.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="path"/> is null or empty.</exception>
+        /// <remarks>
+        /// It is not an error to create a directory that already exists.
+        /// </remarks>
+        public async Task CreateDirectoryAsync(string path, CancellationToken cancellationToken = default)
+        {
+            CanonicalizePath(ref path);
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentNullException(nameof(path));
+
+            var request = this.CreateRequest("dir/" + Uri.EscapeUriString(path));
+            request.Method = "POST";
             using var response = await GetResponseAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
