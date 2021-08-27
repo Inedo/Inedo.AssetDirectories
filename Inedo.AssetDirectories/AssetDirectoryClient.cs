@@ -230,6 +230,7 @@ namespace Inedo.AssetDirectories
 
             var request = this.CreateRequest($"delete/{Uri.EscapeUriString(path)}?recursive={recursive}");
             request.Method = "POST";
+            request.ContentLength = 0;
             using var response = await GetResponseAsync(request, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
@@ -249,6 +250,7 @@ namespace Inedo.AssetDirectories
 
             var request = this.CreateRequest("dir/" + Uri.EscapeUriString(path));
             request.Method = "POST";
+            request.ContentLength = 0;
             using var response = await GetResponseAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
