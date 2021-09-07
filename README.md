@@ -1,4 +1,4 @@
-# UpackLib.NET
+# Inedo.AssetDirectories
 
 [![Build status](https://buildmaster.inedo.com/api/ci-badges/image?API_Key=badges&$ApplicationId=113)](https://buildmaster.inedo.com/api/ci-badges/link?API_Key=badges&$ApplicationId=113)
 
