@@ -13,10 +13,10 @@ namespace Inedo.AssetDirectories
         /// </summary>
         /// <param name="message">The exception message.</param>
         /// <param name="innerException">The inner exception.</param>
-        public AssetDirectoryException(string message, Exception innerException) : base(message, innerException)
+        /// <param name="statusCode">The returned status code.</param>
+        public AssetDirectoryException(string message, Exception innerException, int? statusCode) : base(message, innerException)
         {
-            if (innerException is WebException ex && ex.Response is HttpWebResponse response)
-                this.ResponseCode = (int)response.StatusCode;
+            this.ResponseCode = statusCode;
         }
 
         /// <summary>

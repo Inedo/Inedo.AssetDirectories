@@ -286,7 +286,8 @@ namespace Inedo.AssetDirectories
             }
             catch (WebException ex)
             {
-                throw new AssetDirectoryException(GetErrorMessage(ex), ex);
+                int? statusCode = (int?)(ex.Response as HttpWebResponse)?.StatusCode;
+                throw new AssetDirectoryException(GetErrorMessage(ex), ex, statusCode);
             }
         }
         internal static HttpWebResponse GetResponse(HttpWebRequest request)
@@ -297,7 +298,8 @@ namespace Inedo.AssetDirectories
             }
             catch (WebException ex)
             {
-                throw new AssetDirectoryException(GetErrorMessage(ex), ex);
+                int? statusCode = (int?)(ex.Response as HttpWebResponse)?.StatusCode;
+                throw new AssetDirectoryException(GetErrorMessage(ex), ex, statusCode);
             }
         }
 
