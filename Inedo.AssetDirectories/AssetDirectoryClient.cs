@@ -259,8 +259,13 @@ namespace Inedo.AssetDirectories
             var request = WebRequest.CreateHttp(this.EndpointUrl + url);
             if (this.basicAuthToken != null)
                 request.Headers["Authorization"] = this.basicAuthToken;
+
+            // add both api key headers to support all versions of ProGet
             if (this.apiKey != null)
+            {
+                request.Headers["X-ApiKey"] = this.apiKey;
                 request.Headers["X-ProGet-ApiKey"] = this.apiKey;
+            }
 
             if (decompression)
             {
