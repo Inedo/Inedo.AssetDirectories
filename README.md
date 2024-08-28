@@ -2,8 +2,6 @@
 
 # Inedo.AssetDirectories
 
-[![Build status](https://buildmaster.inedo.com/api/ci-badges/image?API_Key=badges&$ApplicationId=113)](https://buildmaster.inedo.com/api/ci-badges/link?API_Key=badges&$ApplicationId=113)
-
 This library is a set of utilities for working with [ProGet Asset Directories](https://docs.inedo.com/docs/proget-advanced-assets). It wraps the [Asset Directory API](https://docs.inedo.com/docs/proget-reference-api-asset-directories-api)
 with a more accessible C#/.NET interface.
 
